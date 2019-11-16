@@ -50,7 +50,14 @@ class RetryWorker(Worker):
         variable use a comma separated list of numbers, no spaces:
         *Environment variable*: `RQ_RETRY_DELAYS`
         *Default*: [5]
-
+        
+    failed_queue : str
+        Name of failed queue. The default of `failed`
+        does not normally need to be changed unless you have multiple
+        failed queues.
+        *Environment variable*: `RQ_RETRY_FAILED_QUEUE`
+        *Default*: 'failed_queue'
+        
     dead_letter_queue : str
         Name of dead letter queue. The default of `dead_letter_queue`
         does not normally need to be changed unless you have multiple
@@ -63,6 +70,7 @@ class RetryWorker(Worker):
             maint_interval=timedelta(seconds=30),
             max_tries=3,
             delays=[5],
+            failed_queue='failed',
             dead_letter_queue='dead_letter_queue')
 
         retry_config = kwargs.pop('retry_config', {})
@@ -81,6 +89,9 @@ class RetryWorker(Worker):
                 self.delays = []
 
         super(RetryWorker, self).__init__(*args, **kwargs)
+        
+        self._failed_queue = Queue(self.failed_queue,
+                                                  connection=self.connection)
         self._dead_letter_queue = DeadLetterQueue(self.dead_letter_queue,
                                                   connection=self.connection)
 
