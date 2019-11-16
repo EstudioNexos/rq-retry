@@ -70,7 +70,7 @@ class RetryWorker(Worker):
             maint_interval=timedelta(seconds=30),
             max_tries=3,
             delays=[5],
-            failed_queue='failed',
+            failed_queue_name='failed',
             dead_letter_queue='dead_letter_queue')
 
         retry_config = kwargs.pop('retry_config', {})
@@ -90,7 +90,7 @@ class RetryWorker(Worker):
 
         super(RetryWorker, self).__init__(*args, **kwargs)
         
-        self._failed_queue = Queue(self.failed_queue,
+        self.failed_queue = Queue(self.failed_queue_name,
                                                   connection=self.connection)
         self._dead_letter_queue = DeadLetterQueue(self.dead_letter_queue,
                                                   connection=self.connection)
